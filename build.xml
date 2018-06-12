@@ -2,7 +2,7 @@
 <project name="Test" default="all" basedir=".">
 	<property name="build" value="bin" />
 	<property name="projectName" value="${ant.project.name}" />
-	<property name ="className" value="Main"/>
+	<property name ="className" value="Main2"/>
 
 	<target name="all" depends="check, deldir,jar,ex"/>
 

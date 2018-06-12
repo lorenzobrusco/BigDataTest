@@ -23,7 +23,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-public class Main {
+public class Main2 {
 
 	/**
 	 * 
@@ -239,7 +239,7 @@ public class Main {
 
 	/**
 	 * 
-	 * It used to group the time over the solver
+	 * It used to group in the reducer
 	 *
 	 */
 	public static class TimeSolverGroupComparator extends WritableComparator {
