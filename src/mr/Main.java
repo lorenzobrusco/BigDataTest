@@ -8,7 +8,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -24,7 +23,44 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 public class Main {
+	
+	public static void main(String[] args) throws Exception {
 
+		Configuration conf = new Configuration();
+		Job job1 = Job.getInstance(conf, "Job1");
+
+		job1.setMapperClass(TestMapper.class);
+		job1.setReducerClass(TestReducer.class);
+		job1.setGroupingComparatorClass(TimeSolverGroupComparator.class);
+
+		job1.setOutputKeyClass(TimeSolver.class);
+		job1.setOutputValueClass(Text.class);
+
+		FileInputFormat.addInputPath(job1, new Path(args[0]));
+		FileOutputFormat.setOutputPath(job1, new Path(args[1] + "/init"));
+		boolean success = job1.waitForCompletion(true);
+		if (success) {
+			Job job2 = Job.getInstance(conf, "Job2");
+
+			job2.setMapperClass(GroupMapper.class);
+			job2.setReducerClass(GroupReducer.class);
+
+			job2.setOutputKeyClass(IntWritable.class);
+			job2.setOutputValueClass(Text.class);
+
+			FileInputFormat.addInputPath(job2, new Path(args[1] + "/init"));
+			FileOutputFormat.setOutputPath(job2, new Path(args[1] + "/final"));
+
+			System.exit(job2.waitForCompletion(true) ? 0 : 1);
+
+		} else {
+			System.exit(1);
+		}
+	}
+	
+	/**--------------------------------------------------------------------------------**/
+	/**		 						MAPPERS AND REDUCERS 							   **/
+	/**--------------------------------------------------------------------------------**/
 	/**
 	 * 
 	 * The mapper split the input and write in output the key and the real time
@@ -84,7 +120,7 @@ public class Main {
 
 	/**
 	 * 
-	 * For each type store its value in a map and list, sort the list of type and print write
+	 * For each type store its value in a map and list, sort the list of type and write
 	 * output the time in the same order for each tuple
 	 *
 	 */
@@ -128,44 +164,9 @@ public class Main {
 		}
 	}
 
-	public static void main(String[] args) throws Exception {
-
-		Configuration conf = new Configuration();
-		Job job1 = Job.getInstance(conf, "Job1");
-
-		job1.setMapperClass(TestMapper.class);
-		job1.setReducerClass(TestReducer.class);
-		job1.setGroupingComparatorClass(TimeSolverGroupComparator.class);
-
-		job1.setOutputKeyClass(TimeSolver.class);
-		job1.setOutputValueClass(Text.class);
-
-		FileInputFormat.addInputPath(job1, new Path(args[0]));
-		FileOutputFormat.setOutputPath(job1, new Path(args[1] + "/init"));
-		boolean success = job1.waitForCompletion(true);
-		if (success) {
-			Job job2 = Job.getInstance(conf, "Job2");
-
-			job2.setMapperClass(GroupMapper.class);
-			job2.setReducerClass(GroupReducer.class);
-
-			job2.setOutputKeyClass(IntWritable.class);
-			job2.setOutputValueClass(Text.class);
-
-			FileInputFormat.addInputPath(job2, new Path(args[1] + "/init"));
-			FileOutputFormat.setOutputPath(job2, new Path(args[1] + "/final"));
-
-			System.exit(job2.waitForCompletion(true) ? 0 : 1);
-
-		} else {
-			System.exit(1);
-		}
-	}
-
 	/**--------------------------------------------------------------------------------**/
-	/** SORT **/
+	/**		 								SORT 								       **/
 	/**--------------------------------------------------------------------------------**/
-
 	/**
 	 * 
 	 * This subclass is a key used to sort it, and it contains just solver name and
@@ -213,28 +214,6 @@ public class Main {
 			}
 			return cmp;
 		}
-
-		@Override
-		public String toString() {
-			return String.format("%s %s", solver, time);
-		}
-
-		public String getSolver() {
-			return solver;
-		}
-
-		public void setSolver(String solver) {
-			this.solver = solver;
-		}
-
-		public String getTime() {
-			return time;
-		}
-
-		public void setTime(String time) {
-			this.time = time;
-		}
-
 	}
 
 	/**

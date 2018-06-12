@@ -40,7 +40,7 @@ public class Main2 {
 			/** row[11] is REAL */
 			/** row[14] is RESULT */
 			if (row[14].contains("solved")) {
-				context.write(new TimeSolver(row[0], row[11]), new Text(row[11]));
+				context.write(new TimeSolver(row[0], row[11]), new Text(row[11] + "\t" + row[2]));
 			}
 		}
 	}
@@ -70,13 +70,13 @@ public class Main2 {
 	 * the time
 	 *
 	 */
-	static class GroupMapper extends Mapper<LongWritable, Text, IntWritable, Text> {
+	static class GroupMapper extends Mapper<LongWritable, Text, Text, Text> {
 		@Override
-		protected void map(LongWritable key, Text value, Mapper<LongWritable, Text, IntWritable, Text>.Context context)
+		protected void map(LongWritable key, Text value, Mapper<LongWritable, Text, Text, Text>.Context context)
 				throws IOException, InterruptedException {
 			String[] row = value.toString().split("\t");
 			for (int i = 1; i < row.length; i++) {
-				context.write(new IntWritable(i), new Text(row[0] + "\t" + row[i]));
+				context.write(new Text(), new Text(row[0] + "\t" + row[i]));
 			}
 
 		}
